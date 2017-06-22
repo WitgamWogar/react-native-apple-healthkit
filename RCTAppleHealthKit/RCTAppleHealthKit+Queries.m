@@ -203,18 +203,6 @@
     [self.healthStore executeQuery:query];
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 - (void)fetchCorrelationSamplesOfType:(HKQuantityType *)quantityType
                                  unit:(HKUnit *)unit
                             predicate:(NSPredicate *)predicate
@@ -363,6 +351,49 @@
     [self.healthStore executeQuery:query];
 }
 
+- (void)fetchSumOfSamplesByRangeForType:(HKQuantityType *)quantityType
+                                 unit:(HKUnit *)unit
+                              startDate:(NSDate *)startDate
+                                endDate:(NSDate *)endDate
+                           completion:(void (^)(double, NSDate *, NSDate *, NSError *))completionHandler {
+    
+    NSDateComponents *interval = [[NSDateComponents alloc] init];
+    interval.minute = 5;
+    NSDate *anchorDate = startDate;
+    
+    // Create the query
+    HKStatisticsCollectionQuery *query = [[HKStatisticsCollectionQuery alloc] initWithQuantityType:quantityType
+                                                                           quantitySamplePredicate:nil
+                                                                                           options:HKStatisticsOptionCumulativeSum
+                                                                                        anchorDate:anchorDate
+                                                                                intervalComponents:interval];
+    
+    // Set the results handler
+    query.initialResultsHandler = ^(HKStatisticsCollectionQuery *query, HKStatisticsCollection *results, NSError *error) {
+        if (error) {
+            // Perform proper error handling here
+            NSLog(@"*** An error occurred while calculating the statistics: %@ ***", error.localizedDescription);
+        }
+        
+        __block double total = 0.00;
+        
+        [results enumerateStatisticsFromDate:startDate
+                                      toDate:endDate
+                                   withBlock:^(HKStatistics *result, BOOL *stop) {
+                                       
+                                       HKQuantity *quantity = result.sumQuantity;
+                                       if (quantity) {
+                                           double sampleValue = [quantity doubleValueForUnit:unit];
+                                           
+                                           total += sampleValue;
+                                       }
+                                   }];
+        
+        completionHandler(total,startDate, endDate, error);
+    };
+    
+    [self.healthStore executeQuery:query];
+}
 
 - (void)fetchCumulativeSumStatisticsCollection:(HKQuantityType *)quantityType
                                           unit:(HKUnit *)unit
@@ -374,11 +405,11 @@
 
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *interval = [[NSDateComponents alloc] init];
-    interval.day = 1;
+    interval.minute = 1;
 
     NSDateComponents *anchorComponents = [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
                                                      fromDate:[NSDate date]];
-    anchorComponents.hour = 0;
+    anchorComponents.minute = 0;
     NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
 
     // Create the query

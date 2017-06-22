@@ -38,6 +38,12 @@
                                          limit:(NSUInteger)lim
                                     completion:(void (^)(NSArray *, NSError *))completionHandler;
 
+- (void)fetchSumOfSamplesByRangeForType:(HKQuantityType *)quantityType
+                                          unit:(HKUnit *)unit
+                                     startDate:(NSDate *)startDate
+                                       endDate:(NSDate *)endDate
+                                    completion:(void (^)(double, NSDate *, NSDate *, NSError *))completionHandler;
+
 
 
 - (void)fetchSleepCategorySamplesForPredicate:(NSPredicate *)predicate
