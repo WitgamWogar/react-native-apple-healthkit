@@ -262,8 +262,8 @@
                                   endDate:endDate
                                completion:^(double count, NSDate *startDate, NSDate *endDate, NSError *error) {
         if (!count) {
-            NSLog(@"ERROR getting FlightsClimbed: %@", error);
-            callback(@[RCTMakeError(@"ERROR getting FlightsClimbed", error, nil), @(count)]);
+            NSLog(@"ERROR getting WalkingRunningDistance: %@", error);
+            callback(@[RCTMakeError(@"ERROR getting WalkingRunningDistance", error, nil), @(count)]);
             return;
         }
         
@@ -275,6 +275,39 @@
         
         callback(@[[NSNull null], response]);
     }];
+}
+
+- (void)fitness_getDistanceCyclingSumForRange:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit meterUnit]];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    
+    if(startDate == nil){
+        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
+        return;
+    }
+    HKQuantityType *quantityType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceCycling];
+    
+    [self fetchSumOfSamplesByRangeForType:quantityType
+                                     unit:unit
+                                startDate:startDate
+                                  endDate:endDate
+                               completion:^(double count, NSDate *startDate, NSDate *endDate, NSError *error) {
+                                   if (!count) {
+                                       NSLog(@"ERROR getting CyclingDistance: %@", error);
+                                       callback(@[RCTMakeError(@"ERROR getting CyclingDistance", error, nil), @(count)]);
+                                       return;
+                                   }
+                                   
+                                   NSDictionary *response = @{
+                                                              @"value" : @(count),
+                                                              @"startDate" : [RCTAppleHealthKit buildISO8601StringFromDate:startDate],
+                                                              @"endDate" : [RCTAppleHealthKit buildISO8601StringFromDate:endDate],
+                                                              };
+                                   
+                                   callback(@[[NSNull null], response]);
+                               }];
 }
 
 @end

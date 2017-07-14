@@ -19,5 +19,6 @@
 - (void)fitness_getFlightsClimbedOnDay:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)fitness_getDailyDistanceWalkingRunningSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)fitness_getDistanceWalkingRunningSumForRange:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)fitness_getDistanceCyclingSumForRange:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 
 @end
