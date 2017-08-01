@@ -409,7 +409,7 @@
 
     NSDateComponents *anchorComponents = [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear
                                                      fromDate:[NSDate date]];
-    anchorComponents.minute = 0;
+
     NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
 
     // Create the query
